@@ -4,6 +4,7 @@
 #define PR_AT_LEAST_ONE_ROOT_LOST    -1
 #define PR_AT_LEAST_ONE_ROOT_IS_FAKE -2
 #define PR_2_INFINITE_ROOTS          -3
+#define PR_AT_LEAST_ONE_ROOT_IS_NAN    -4
 
 #define PR_DISCRIMINANT_USE_TRADITIONAL_OPERATIONS_NORMALIZED 0
 #define PR_DISCRIMINANT_USE_TRADITIONAL_OPERATIONS_NORMALIZED 0
@@ -42,16 +43,20 @@ int compare_roots(
         // here the greatest relative error among all the roots found will be placed
         fp_t &max_relative_error);
 
-
-// For vector of complex roots
+// Compares two vectors of roots; root orderings play no role. For each entry in (roots_ground_truth),
+// the closest entry in (roots_to_check) is found and corresponding distance found. Among such distances
+// the largest will be stored to (max_deviation)
 template<typename fp_t>
-int compare_roots(
-        unsigned N_roots_to_check_complex, // number of roots(in roots_to_check_complex)
-        unsigned N_roots_ground_truth, // number of roots(in roots_ground_truth)
-        std::vector<std::complex<fp_t>> &roots_to_check_complex,
-        std::vector<fp_t> &roots_ground_truth,
-        fp_t &max_absolute_error,
+int compare_roots2(
+        unsigned N_roots_to_check, // number of roots in (roots_to_check)
+        unsigned N_roots_ground_truth,  // number of roots in (roots_ground_truth)
+        std::vector<fp_t> &roots_to_check, // one should take into account only first (N_roots_to_check) roots here
+        std::vector<fp_t> &roots_ground_truth, // one should take into account only first (N_roots_ground_truth) roots here
+        fp_t &max_absolute_error, // here the greatest among the smallest deviations of the roots in (roots_to_check) and (roots_ground_truth)
+        // will be placed
+        // here the greatest relative error among all the roots found will be placed
         fp_t &max_relative_error);
+
 
 // Creates a test polynomial, both in the form of roots, e.g. (x-roots[0])*(x-roots[1])*(quadratic polynomial with no real roots) and
 // represented by coefficients, e.g. (coefficients[4]=1)*x^4 + coefficients[3]*x^3 + coefficients[2]*x^2 + coefficients[1]*x + coefficients[0].
@@ -78,13 +83,5 @@ int compare_roots_complex(unsigned N_roots_to_check, // number of roots in roots
         // will be placed
         // here the greatest relative error among all the roots found will be placed
                           fp_t &max_relative_error);
-
-
-
-
-
-//The function checks the roots for complexity and returns the vector of real roots
-template<typename fp_t>
-std::vector<fp_t> return_real_roots(std::vector<std::complex<fp_t>> &roots_to_check);
 
 #endif //POLYROOTS1234_HPP

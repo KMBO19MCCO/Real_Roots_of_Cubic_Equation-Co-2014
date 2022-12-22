@@ -53,7 +53,8 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
         b = b/a;
         c = c/a;
         d = d/a;
-        fp_t bThird=b*oneThird;
+        fp_t bThird=b/3;
+
 
         //подход Чирнхауса-Виета: пусть x=t+B
         //t=x-b/3 (B=-b/3a) -> коэф.при t^2 = 0 -> получаем t^3+pt+q=0
@@ -85,30 +86,33 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
             //cout<< "arg=" << arg << '\n';
 #endif
             phi = (abs(arg) > 1 ? 0 : acos(arg));
+
 #ifdef DEBUG
             roots[0]=fma(A,cos((phi*oneThird)),-bThird);
             roots[1]=fma(A,cos((phi + twoPi)*oneThird),-bThird);
             roots[2]=fma(A,cos((phi + twoPi*2)*oneThird),-bThird);
            // cout<<roots[0]<<" "<<roots[1]<<" "<<roots[2]<<"\n";
 #else
-            roots[0]=fma(A,cos((phi*oneThird)),-bThird);              //переходим обратно к x=t+B=Acos(phi)+B
-            roots[1]=fma(A,cos((phi + twoPi)*oneThird),-bThird);
-            roots[2]=fma(A,cos((phi + twoPi*2)*oneThird),-bThird);
+            fp_t phiThird=phi/3;
+            roots[0]=fma(A,cos((phiThird)),-bThird);              //переходим обратно к x=t+B=Acos(phi)+B
+            roots[1]=fma(A,cos(phiThird + twoPi*oneThird),-bThird);
+            roots[2]=fma(A,cos(phiThird + twoPi*2*oneThird),-bThird);
 #endif
             }
         } else {
+            fp_t phiThird=phi/3;
             // D > 0, только действит.корни
             cnt_real_roots = 1;
             if (p < 0){
                 phi = acosh(-3*abs(q)/(A*p));
-                roots[0]=((q > 0 ? -A : A)*cosh(phi*oneThird) - bThird);
+                roots[0]=((q > 0 ? -A : A)*cosh(phiThird) - bThird);
 
             } else if (p == 0) {
                 roots[0]=(cbrt(q) - bThird);
             } else {  // p > 0
                 phi = asinh(3*q/(A*p));
                 //roots[0]=(-A*sinh(phi/3) - b/3);
-                roots[0]=fma(-A,sinh(phi*oneThird),-bThird);
+                roots[0]=fma(-A,sinh(phiThird),-bThird);
             }
         }
     }

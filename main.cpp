@@ -32,7 +32,7 @@ auto diff_of_products(fp_t a, fp_t b, fp_t c, fp_t d) //fms
 template<typename fp_t>
 int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
 
-    fp_t a, b, c, d, phi, A, B, D, p, q, pp;
+    fp_t a, b, c, d, phi, A, B, D, p, q, pp,phiThird;
     fp_t pi=static_cast<fp_t>(numbers::pi);
     fp_t eps=static_cast<fp_t>(std::numeric_limits<fp_t>::epsilon());
     fp_t twoPi=2*pi;
@@ -53,7 +53,7 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
         b = b/a;
         c = c/a;
         d = d/a;
-        fp_t bThird=b/3;
+        fp_t bThird=b*oneThird;
 
 
         //подход Чирнхауса-Виета: пусть x=t+B
@@ -88,19 +88,19 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
             phi = (abs(arg) > 1 ? 0 : acos(arg));
 
 #ifdef DEBUG
-            roots[0]=fma(A,cos((phi*oneThird)),-bThird);
-            roots[1]=fma(A,cos((phi + twoPi)*oneThird),-bThird);
-            roots[2]=fma(A,cos((phi + twoPi*2)*oneThird),-bThird);
+            roots[0]=fma(A,cos(phiThird),-bThird);
+            roots[1]=fma(A,cos(phiThird + twoPi*oneThird),-bThird);
+            roots[2]=fma(A,cos(phiThird + twoPi*2*oneThird),-bThird);
            // cout<<roots[0]<<" "<<roots[1]<<" "<<roots[2]<<"\n";
 #else
-            fp_t phiThird=phi/3;
-            roots[0]=fma(A,cos((phiThird)),-bThird);              //переходим обратно к x=t+B=Acos(phi)+B
+            phiThird=phi*oneThird;
+            roots[0]=fma(A,cos(phiThird),-bThird);              //переходим обратно к x=t+B=Acos(phi)+B
             roots[1]=fma(A,cos(phiThird + twoPi*oneThird),-bThird);
             roots[2]=fma(A,cos(phiThird + twoPi*2*oneThird),-bThird);
 #endif
             }
         } else {
-            fp_t phiThird=phi/3;
+            phiThird=phi*oneThird;
             // D > 0, только действит.корни
             cnt_real_roots = 1;
             if (p < 0){
@@ -170,7 +170,7 @@ int main() {
     // МЕТОД С ВЕЩЕСТВЕННЫМИ ВЫЧИСЛЕНИЯМИ
     float max_absolut_deviation = 0;
     float max_relative_deviation = 0;
-    for (auto i = 0; i < 10'000'000; ++i) {
+    for (auto i = 0; i < 1'000'000; ++i) {
         auto deviation = testPolynomial<float>(3);
 
         if (deviation.first > max_absolut_deviation) {

@@ -28,7 +28,76 @@ auto diff_of_products(fp_t a, fp_t b, fp_t c, fp_t d) //fms
     auto f = fmaf (a, b, -w);
     return f + e;
 }*/
+// Flexible suppression of the imaginary part of a complex number
+template<typename fp_t>
+inline complex<fp_t> epsilonComplex(const complex<fp_t> &x) {
+    return abs(x) * numeric_limits<fp_t>::epsilon() > abs(x.imag()) ? complex<fp_t>(x.real(), 0) : x;
+}
+//linear method
+template<typename fp_t>
+int linearEqSolve(fp_t a, fp_t b, vector<fp_t> &roots){
+    roots[0] = -b / a;
+    if(isnan(roots[0]) || isinf(roots[0]))
+        return 0;
+    return 1;
+}
 
+//quadratic method
+template<typename fp_t>
+int quadraticEqSolve(fp_t a, fp_t b, fp_t c, vector<fp_t> &roots){
+
+    // Normalizing
+    if((isnan(a)) || isinf(b /= a))
+        return linearEqSolve(b, c, roots);
+    if(isinf(c /= a)) return 0;
+    a = 1;
+
+    // constants
+    const fp_t oneHalf=static_cast<fp_t>(0.5L);
+    const fp_t pi = static_cast<fp_t>(numbers::pi);
+
+    // temp variables
+    fp_t sqrC, tang, tmp;
+    complex<fp_t> alfa;
+
+    if (c < 0){
+        sqrC = sqrt(-c);
+        tmp = -b/(2 * sqrC);
+        if(isnan(tmp) || isinf(tmp))
+            return 0;
+        alfa = epsilonComplex<fp_t>(-atan<fp_t>(tmp));
+
+        if (! alfa.imag()) {
+            tang = tan(fma<fp_t>(pi, oneHalf, alfa.real()) * oneHalf);
+            roots[0] = -sqrC * tang;
+            roots[1]= sqrC / tang;
+
+            if(isnan(roots[1]) || isinf(roots[1]))
+                return 1;
+            return 2;
+        }
+        return 0; // No real roots
+    }
+    else if (abs(b) >= 2 * sqrt(c)){
+        sqrC = sqrt(c);
+        tmp = -2 * sqrC / b;
+        if(isnan(tmp) || isinf(tmp))
+            return 0;
+        alfa = epsilonComplex(asin<fp_t>(tmp));
+        tang = tan(alfa.real() * oneHalf);
+
+        if(!alfa.imag()){
+            roots[0] = sqrC * tang;
+            roots[1] = sqrC / tang;
+
+            if(isnan(roots[1]) || isinf(roots[1]))
+                return 1; // check if there is no inf
+            return 2;
+        }
+        return 0; // No real roots
+    }
+    return 0; // D < 0 => No real roots
+}
 template<typename fp_t>
 int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
 
@@ -36,6 +105,7 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
     fp_t pi=static_cast<fp_t>(numbers::pi);
     fp_t eps=static_cast<fp_t>(std::numeric_limits<fp_t>::epsilon());
     fp_t twoPi=2*pi;
+    fp_t fourPi=4*pi;
     //Coefficients
     a = coefficients[3];
     b = coefficients[2];
@@ -47,12 +117,17 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
     fp_t oneFourth=static_cast<fp_t>(1.0L/4);
     fp_t oneTwentySeventh=static_cast<fp_t>(1.0L/27);
 
+    if((isnan(a)) || isinf(b /= a))
+        return quadraticEqSolve(b, c, d, roots);
+    if(isinf(c /= a)) return 0;
+    if(isinf(d /= a)) return 0;
+    a = 1;
 
     if (a != 0){
 
-        b = b/a;
-        c = c/a;
-        d = d/a;
+        b /= a;
+        c /= a;
+        d /= a;
         fp_t bThird=b*oneThird;
 
 
@@ -95,8 +170,8 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
 #else
             phiThird=phi*oneThird;
             roots[0]=fma(A,cos(phiThird),-bThird);              //переходим обратно к x=t+B=Acos(phi)+B
-            roots[1]=fma(A,cos(phiThird + twoPi*oneThird),-bThird);
-            roots[2]=fma(A,cos(phiThird + twoPi*2*oneThird),-bThird);
+            roots[1]=fma(A,cos((phi + twoPi)*oneThird),-bThird);
+            roots[2]=fma(A,cos((phi + fourPi)*oneThird),-bThird);
 #endif
             }
         } else {

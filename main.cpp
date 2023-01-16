@@ -164,8 +164,8 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
 
 #ifdef DEBUG
             roots[0]=fma(A,cos(phiThird),-bThird);
-            roots[1]=fma(A,cos(phiThird + twoPi*oneThird),-bThird);
-            roots[2]=fma(A,cos(phiThird + twoPi*2*oneThird),-bThird);
+            roots[1]=fma(A,cos((phi + twoPi)*oneThird),-bThird);
+            roots[2]=fma(A,cos((phiThird + fourPi)*oneThird),-bThird);
            // cout<<roots[0]<<" "<<roots[1]<<" "<<roots[2]<<"\n";
 #else
             phiThird=phi*oneThird;

@@ -286,6 +286,7 @@ int compare_roots(
 {
     max_absolute_error = static_cast<fp_t>(0);
     max_relative_error = static_cast<fp_t>(0);
+
     for(int i = 0; i< N_roots_to_check; i++){
         if(std::isnan(roots_to_check[i]))
             return PR_AT_LEAST_ONE_ROOT_IS_NAN;
@@ -295,12 +296,17 @@ int compare_roots(
     auto rv = (N_roots_to_check < N_roots_ground_truth) ? PR_AT_LEAST_ONE_ROOT_LOST :
               ((N_roots_to_check > N_roots_ground_truth) ? PR_AT_LEAST_ONE_ROOT_IS_FAKE : PR_NUMBERS_OF_ROOTS_EQUAL);
 // find the largest distance between the closest pairs of roots: one - from ground truth, one - from found ones
+    if (N_roots_to_check <= 0) {
+        throw std::out_of_range("N_roots_to_check should be greater than zero");
+    }
     for (int i = 0; i < N_roots_ground_truth; ++i) {
         // find the closest found root to the given ground truth root
         fp_t deviation_min_for_this_root = std::numeric_limits<fp_t>::infinity();
         auto i_closest_root = -1, j_closest_root = -1;
+        //std::cout<<"rootsToCheck:"<<N_roots_to_check;
         for (int j = 0; j < N_roots_to_check; ++j) {
             deviation = std::abs(roots_ground_truth[i] - roots_to_check[j]);
+            //std::cout<<"dev:"<<deviation;
             deviation_min_for_this_root =
                     deviation < deviation_min_for_this_root ? i_closest_root = i, j_closest_root = j, deviation
                                                             : deviation_min_for_this_root;

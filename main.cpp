@@ -30,6 +30,11 @@ auto diff_of_products(fp_t a, fp_t b, fp_t c, fp_t d) //fms
 }*/
 // Flexible suppression of the imaginary part of a complex number
 template<typename fp_t>
+inline bool isZero(const fp_t& x)
+{
+    return FP_ZERO == fpclassify(x);
+}
+template<typename fp_t>
 inline complex<fp_t> epsilonComplex(const complex<fp_t> &x) {
     return abs(x) * numeric_limits<fp_t>::epsilon() > abs(x.imag()) ? complex<fp_t>(x.real(), 0) : x;
 }
@@ -45,10 +50,10 @@ int linearEqSolve(fp_t a, fp_t b, vector<fp_t> &roots){
 //quadratic method
 template<typename fp_t>
 int quadraticEqSolve(fp_t a, fp_t b, fp_t c, vector<fp_t> &roots){
-
+    //ax^2+bx+c=0
     // Normalizing
-    if((isnan(a)) || isinf(b /= a))
-        return linearEqSolve(b, c, roots);
+    if (isZero(a)) return linearEqSolve(b, c, roots);
+    if (isinf(b /= a)) return 0;
     if(isinf(c /= a)) return 0;
     a = 1;
 
@@ -100,7 +105,7 @@ int quadraticEqSolve(fp_t a, fp_t b, fp_t c, vector<fp_t> &roots){
 }
 template<typename fp_t>
 int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
-
+    //ax^3+bx^2+cx+d=0
     fp_t a, b, c, d, phi, A, B, D, p, q, pp,phiThird;
     fp_t pi=static_cast<fp_t>(numbers::pi);
     fp_t eps=static_cast<fp_t>(std::numeric_limits<fp_t>::epsilon());
@@ -117,10 +122,10 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
     fp_t oneFourth=static_cast<fp_t>(1.0L/4);
     fp_t oneTwentySeventh=static_cast<fp_t>(1.0L/27);
 
-    if((isnan(a)) || isinf(b /= a))
-        return quadraticEqSolve(b, c, d, roots);
-    if(isinf(c /= a)) return 0;
-    if(isinf(d /= a)) return 0;
+    if (isZero(a)) return quadraticEqSolve(b,c,d,roots);
+    if (isinf(b /= a)) return 0;
+    if (isinf(c /= a)) return 0;
+    if (isinf(d /= a)) return 0;
     a = 1;
 
     if (a != 0){
@@ -129,7 +134,6 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
         c /= a;
         d /= a;
         fp_t bThird=b*oneThird;
-
 
         //подход Чирнхауса-Виета: пусть x=t+B
         //t=x-b/3 (B=-b/3a) -> коэф.при t^2 = 0 -> получаем t^3+pt+q=0

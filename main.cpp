@@ -52,8 +52,7 @@ template<typename fp_t>
 int quadraticEqSolve(fp_t a, fp_t b, fp_t c, vector<fp_t> &roots){
     //ax^2+bx+c=0
     // Normalizing
-    if (isZero(a)) return linearEqSolve(b, c, roots);
-    if (isinf(b /= a)) return 0;
+    if (isZero(a) || (isinf(b /= a))) return linearEqSolve(b, c, roots);
     if(isinf(c /= a)) return 0;
     a = 1;
 
@@ -122,17 +121,10 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
     fp_t oneFourth=static_cast<fp_t>(1.0L/4);
     fp_t oneTwentySeventh=static_cast<fp_t>(1.0L/27);
 
-    if (isZero(a)) return quadraticEqSolve(b,c,d,roots);
-    if (isinf(b /= a)) return 0;
+    if (isZero(a) || (isinf(b /= a)))  return quadraticEqSolve(b,c,d,roots);
     if (isinf(c /= a)) return 0;
     if (isinf(d /= a)) return 0;
     a = 1;
-
-    if (a != 0){
-
-        b /= a;
-        c /= a;
-        d /= a;
         fp_t bThird=b*oneThird;
 
         //подход Чирнхауса-Виета: пусть x=t+B
@@ -194,7 +186,7 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
                 roots[0]=fma(-A,sinh(phiThird),-bThird);
             }
         }
-    }
+
 #ifdef DEBUG
     for (int i=0;i<cnt_real_roots;i++)
         cout<<"roots["<<i<<"] is "<<roots[i]<<"\n";

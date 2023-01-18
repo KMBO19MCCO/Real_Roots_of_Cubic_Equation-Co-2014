@@ -125,34 +125,34 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
     if (isinf(c /= a)) return 0;
     if (isinf(d /= a)) return 0;
     a = 1;
-        fp_t bThird=b*oneThird;
+    fp_t bThird=b*oneThird;
 
-        //подход Чирнхауса-Виета: пусть x=t+B
-        //t=x-b/3 (B=-b/3a) -> коэф.при t^2 = 0 -> получаем t^3+pt+q=0
+    //подход Чирнхауса-Виета: пусть x=t+B
+    //t=x-b/3 (B=-b/3a) -> коэф.при t^2 = 0 -> получаем t^3+pt+q=0
 
-        //p = c - b*b/3;
-         p = fma<fp_t>(-bThird,b,c);
-        //q = b*(2*b*b/9 - c)/3+d;
-        q=fma<fp_t>(bThird, fma(b*twoNinths,b,-c),d);
-        //D=p*p*p/27+q*q/4;
-        pp=p*p;
-        D=fma<fp_t>(p*oneTwentySeventh,pp,0)+fma<fp_t>(q*oneFourth,q,0);
-        A = 2*sqrt(abs(p)*oneThird), phi;
+    //p = c - b*b/3;
+    p = fma<fp_t>(-bThird,b,c);
+    //q = b*(2*b*b/9 - c)/3+d;
+    q=fma<fp_t>(bThird, fma(b*twoNinths,b,-c),d);
+    //D=p*p*p/27+q*q/4;
+    pp=p*p;
+    D=fma<fp_t>(p*oneTwentySeventh,pp,0)+fma<fp_t>(q*oneFourth,q,0);
+    A = 2*sqrt(abs(p)*oneThird), phi;
 #ifdef DEBUG
         cout<< "cubic::\n";
         cout <<a<<"x^3+"<<b<<"x^2+"<<c<<"x+"<<d<< '\n';
         //cout<< "D=" << D << " A=" << A  << '\n';
         //cout<< "p=" << p << " q=" << q << '\n';
 #endif
-        if (D <= 0 || abs(D) < eps){ // 3 действит.корня;  1 корень при (p=q=0)
+    if (D <= 0 || abs(D) < eps){ // 3 действит.корня;  1 корень при (p=q=0)
 
-            if (p == 0 && q == 0){
-                roots[0]=(-bThird);
-                cnt_real_roots = 1;
+        if (p == 0 && q == 0){
+            roots[0]=(-bThird);
+            cnt_real_roots = 1;
 
-            } else {
-                fp_t arg = 3*q/(A*p);
-                cnt_real_roots = 3;
+        } else {
+            fp_t arg = 3*q/(A*p);
+            cnt_real_roots = 3;
 #ifdef DEBUG
             //cout<< "arg=" << arg << '\n';
 #endif
@@ -161,7 +161,7 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
 #ifdef DEBUG
             roots[0]=fma(A,cos(phiThird),-bThird);
             roots[1]=fma(A,cos((phi + twoPi)*oneThird),-bThird);
-            roots[2]=fma(A,cos((phiThird + fourPi)*oneThird),-bThird);
+            roots[2]=fma(A,cos((phi + fourPi)*oneThird),-bThird);
            // cout<<roots[0]<<" "<<roots[1]<<" "<<roots[2]<<"\n";
 #else
             phiThird=phi*oneThird;

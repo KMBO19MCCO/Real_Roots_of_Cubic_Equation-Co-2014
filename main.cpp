@@ -179,10 +179,12 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
                 roots[0]=(cbrt(q) - bThird);
              }
             else if (p < 0){
+                if (isinf(-3*abs(q)/(A*p))||isnan(-3*abs(q)/(A*p))) return 0;
                 phi = acosh(-3*abs(q)/(A*p));
                 roots[0]=((q > 0 ? -A : A)*cosh(phi*oneThird) - bThird);
             }
              else {  // p > 0
+                 if (isinf(3*q/(A*p))||isnan(3*q/(A*p))) return 0;
                 phi = asinh(3*q/(A*p));
                 //roots[0]=(-A*sinh(phi/3) - b/3);
                 roots[0]=fma(-A,sinh(phi*oneThird),-bThird);

@@ -20,14 +20,14 @@ using namespace std;
 
 //#define DEBUG //раскомментировать для вывода
 
-template<typename fp_t>
+/*template<typename fp_t>
 auto diff_of_products(fp_t a, fp_t b, fp_t c, fp_t d) //fms
 {
     auto w = d * c;
     auto e = fmaf (c, -d, w);
     auto f = fmaf (a, b, -w);
     return f + e;
-}
+}*/
 
 // Flexible suppression of the imaginary part of a complex number
 template<typename fp_t>

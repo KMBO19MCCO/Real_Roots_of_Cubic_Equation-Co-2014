@@ -158,19 +158,24 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
             if (isinf(arg)||isnan(arg)) return 0;
 
 #ifdef DEBUG
-            //cout<< "arg=" << arg << '\n';
+            cout<< "arg=" << arg << '\n';
 #endif
             phi = (abs(arg) > 1 ? 0 : acos(arg));
-            phiThird=phi*oneThird;
+
 #ifdef DEBUG
             roots[0]=fma(A,cos(phiThird),-bThird);
-            roots[1]=fma(A,cos((phi + twoPi)*oneThird),-bThird);
-            roots[2]=fma(A,cos((phi + fourPi)*oneThird),-bThird);
-           // cout<<roots[0]<<" "<<roots[1]<<" "<<roots[2]<<"\n";
+            roots[1]=fma(A,cos((phi - twoPi)*oneThird),-bThird);
+            roots[2]=fma(A,cos((phi - fourPi)*oneThird),-bThird);
+            cout<<roots[0]<<" "<<roots[1]<<" "<<roots[2]<<"\n";
+            cout<<"cos((phi + twoPi)*oneThird)="<<cos((phi + twoPi)*oneThird)<<'\n';
 #endif
+            fp_t K = -log(abs(arg + sqrt(arg * arg - 1)));
+            if (phi<0) phi-=K;
+            else if (phi>=0) phi+=K;
+            phiThird=phi*oneThird;
             roots[0]=fma(A,cos(phiThird),-bThird);              //переходим обратно к x=t+B=Acos(phi)+B
-            roots[1]=fma(A,cos((phi + twoPi)*oneThird),-bThird);
-            roots[2]=fma(A,cos((phi + fourPi)*oneThird),-bThird);
+            roots[1]=fma(A,cos((phi - twoPi)*oneThird),-bThird);
+            roots[2]=fma(A,cos((phi - fourPi)*oneThird),-bThird);
             }
         } else {
             // D > 0, только действит.корни
@@ -245,7 +250,7 @@ int main() {
     // МЕТОД С ВЕЩЕСТВЕННЫМИ ВЫЧИСЛЕНИЯМИ
     float max_absolut_deviation = 0;
     float max_relative_deviation = 0;
-    for (auto i = 0; i < 1'000'000; ++i) {
+    for (auto i = 0; i < 10'000'000; ++i) {
         auto deviation = testPolynomial<float>(3);
 
         if (deviation.first > max_absolut_deviation) {

@@ -20,14 +20,15 @@ using namespace std;
 
 //#define DEBUG //раскомментировать для вывода
 
-/*template<typename fp_t>
+template<typename fp_t>
 auto diff_of_products(fp_t a, fp_t b, fp_t c, fp_t d) //fms
 {
     auto w = d * c;
     auto e = fmaf (c, -d, w);
     auto f = fmaf (a, b, -w);
     return f + e;
-}*/
+}
+
 // Flexible suppression of the imaginary part of a complex number
 template<typename fp_t>
 inline bool isZero(const fp_t& x)
@@ -105,11 +106,11 @@ int quadraticEqSolve(fp_t a, fp_t b, fp_t c, vector<fp_t> &roots){
 template<typename fp_t>
 int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
     //ax^3+bx^2+cx+d=0
-    fp_t a, b, c, d, phi, A, B, D, p, q, pp,phiThird;
+    fp_t a, b, c, d, phi, A, B, D, p, q, pp,qq,phiThird;
     fp_t pi=static_cast<fp_t>(numbers::pi);
     fp_t eps=static_cast<fp_t>(std::numeric_limits<fp_t>::epsilon());
-    fp_t twoPi=2*pi;
-    fp_t fourPi=4*pi;
+    fp_t twoPi=static_cast<fp_t>(2)*pi;
+    fp_t fourPi=static_cast<fp_t>(4)*pi;
     //Coefficients
     a = coefficients[3];
     b = coefficients[2];
@@ -136,7 +137,8 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
     q=fma<fp_t>(bThird, fma(b*twoNinths,b,-c),d);
     //D=p*p*p/27+q*q/4;
     pp=p*p;
-    D=fma<fp_t>(p*oneTwentySeventh,pp,0)+fma<fp_t>(q*oneFourth,q,0);
+    qq=q*q;
+    D=fma<fp_t>(p*oneTwentySeventh,pp,qq*oneFourth);
     A = 2*sqrt(abs(p)*oneThird), phi;
 #ifdef DEBUG
         cout<< "cubic::\n";
@@ -151,39 +153,39 @@ int solve_cubic(std::vector<fp_t> coefficients, std::vector<fp_t> &roots) {
             cnt_real_roots = 1;
 
         } else {
-            fp_t arg = 3*q/(A*p);
+            fp_t arg = (3*q)/(A*p);
             cnt_real_roots = 3;
+            if (isinf(arg)||isnan(arg)) return 0;
+
 #ifdef DEBUG
             //cout<< "arg=" << arg << '\n';
 #endif
             phi = (abs(arg) > 1 ? 0 : acos(arg));
-
+            phiThird=phi*oneThird;
 #ifdef DEBUG
             roots[0]=fma(A,cos(phiThird),-bThird);
             roots[1]=fma(A,cos((phi + twoPi)*oneThird),-bThird);
             roots[2]=fma(A,cos((phi + fourPi)*oneThird),-bThird);
            // cout<<roots[0]<<" "<<roots[1]<<" "<<roots[2]<<"\n";
-#else
-            phiThird=phi*oneThird;
+#endif
             roots[0]=fma(A,cos(phiThird),-bThird);              //переходим обратно к x=t+B=Acos(phi)+B
             roots[1]=fma(A,cos((phi + twoPi)*oneThird),-bThird);
             roots[2]=fma(A,cos((phi + fourPi)*oneThird),-bThird);
-#endif
             }
         } else {
-            phiThird=phi*oneThird;
             // D > 0, только действит.корни
             cnt_real_roots = 1;
-            if (p < 0){
-                phi = acosh(-3*abs(q)/(A*p));
-                roots[0]=((q > 0 ? -A : A)*cosh(phiThird) - bThird);
-
-            } else if (p == 0) {
+             if ((p == 0) ||isinf(3*q/(A*p))||isinf(-3*abs(q)/(A*p))) {
                 roots[0]=(cbrt(q) - bThird);
-            } else {  // p > 0
+             }
+            else if (p < 0){
+                phi = acosh(-3*abs(q)/(A*p));
+                roots[0]=((q > 0 ? -A : A)*cosh(phi*oneThird) - bThird);
+            }
+             else {  // p > 0
                 phi = asinh(3*q/(A*p));
                 //roots[0]=(-A*sinh(phi/3) - b/3);
-                roots[0]=fma(-A,sinh(phiThird),-bThird);
+                roots[0]=fma(-A,sinh(phi*oneThird),-bThird);
             }
         }
 
